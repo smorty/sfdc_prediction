@@ -9,45 +9,45 @@ library(lubridate)
 # Read in data===================================================================================================================
 
 opportunity_raw <- read.csv("Oppty_Acct_df.csv")
-
+names(opportunity_raw)
 
 # Extract variables (probably not needed)========================================================================================
-y <- opportunity$WON__C #y variable
-probability <- opportunity$PROBABILITY #probability produces high R-squared
-
-#for NLP
-description <- opportunity$DESCRIPTION
-crit_biz_issue <- opportunity$CRITICAL_BUSINESS_ISSUES__C #high %null
-cust_hot_button <- opportunity$CUSTOMER_HOT_BUTTONS__C #high %null
-cust_pressure_desc <- opportunity$CUSTOMER_PRESSURES_DESCRIPTION__C #high %null
-fold_cart_cust <- opportunity$FOLDING_CARTON_CUSTOMER__C #high %null
-
-#categorical
-lead_source <- opportunity$LEADSOURCE
-currency <- opportunity$CURRENCYISOCODE
-region <- opportunity$REGION__C
-area <- opportunity$AREA__C
-division <- opportunity$DIVISION__C
-opp_division <- opportunity$OPPORTUNITY_DIVISION__C #figure out what this is relative to division
-owner <- opportunity$OPPORTUNITY_OWNER_MANAGER_EMAIL_FORMULA__C #280 total
-NAICS_code <- opportunity$NAICS_CODE__C #use a wildcard on this: farming, manufacturing, wholesale
-industry <- opportunity$INDUSTRY__C #needs cleaning
-paprbrd_sub_util <- opportunity$PAPERBOARD_SUBSTRATES_UTILIZED__C #needs cleaning
-ship_to_state <- opportunity$SHIP_TO_STATE__C #needs cleaning
-
-#account fields
-account_tier <- opportunity$ACCOUNT_TIER__C
-account_type <- opportunity$ACCOUNT_TYPE__C
-customer_class <- opportunity$CUSTOMER_CLASSIFICATION__C
-enterp_acc <- opportunity$ENTERPRISE_ACCOUNT__C_x
-
-#datetime
-created_date <- opportunity$CREATEDDATE
-close_date <- opportunity$CLOSEDATE
-last_activity_date <- opportunity$LASTACTIVITYDATE
-fiscal_quarter <- opportunity$FISCALQUARTER
-fiscal_year <- opportunity$FISCALYEAR
-stage_change_date <- opportunity$STAGE_CHANGE_DATE_STAMP__C
+# y <- opportunity$WON__C #y variable
+# probability <- opportunity$PROBABILITY #probability produces high R-squared
+# 
+# #for NLP
+# description <- opportunity$DESCRIPTION
+# crit_biz_issue <- opportunity$CRITICAL_BUSINESS_ISSUES__C #high %null
+# cust_hot_button <- opportunity$CUSTOMER_HOT_BUTTONS__C #high %null
+# cust_pressure_desc <- opportunity$CUSTOMER_PRESSURES_DESCRIPTION__C #high %null
+# fold_cart_cust <- opportunity$FOLDING_CARTON_CUSTOMER__C #high %null
+# 
+# #categorical
+# lead_source <- opportunity$LEADSOURCE
+# currency <- opportunity$CURRENCYISOCODE
+# region <- opportunity$REGION__C
+# area <- opportunity$AREA__C
+# division <- opportunity$DIVISION__C
+# opp_division <- opportunity$OPPORTUNITY_DIVISION__C #figure out what this is relative to division
+# owner <- opportunity$OPPORTUNITY_OWNER_MANAGER_EMAIL_FORMULA__C #280 total
+# NAICS_code <- opportunity$NAICS_CODE__C #use a wildcard on this: farming, manufacturing, wholesale
+# industry <- opportunity$INDUSTRY__C #needs cleaning
+# paprbrd_sub_util <- opportunity$PAPERBOARD_SUBSTRATES_UTILIZED__C #needs cleaning
+# ship_to_state <- opportunity$SHIP_TO_STATE__C #needs cleaning
+# 
+# #account fields
+# account_tier <- opportunity$ACCOUNT_TIER__C
+# account_type <- opportunity$ACCOUNT_TYPE__C
+# customer_class <- opportunity$CUSTOMER_CLASSIFICATION__C
+# enterp_acc <- opportunity$ENTERPRISE_ACCOUNT__C_x
+# 
+# #datetime
+# created_date <- opportunity$CREATEDDATE
+# close_date <- opportunity$CLOSEDATE
+# last_activity_date <- opportunity$LASTACTIVITYDATE
+# fiscal_quarter <- opportunity$FISCALQUARTER
+# fiscal_year <- opportunity$FISCALYEAR
+# stage_change_date <- opportunity$STAGE_CHANGE_DATE_STAMP__C
 
 # Pre-process data==============================================================================================================
 
@@ -66,14 +66,13 @@ opportunity <- opportunity[ , !(names(opportunity) %in% drops)]
 #group LeadSource values
 opportunity$LEADSOURCE[opportunity$LEADSOURCE=="APS Mandrel-Formed Campaign"] <- "Other"
 opportunity$LEADSOURCECLEAN <- opportunity$LEADSOURCE
-ls_table <- as.data.frame(table(lead_source))
+
+ls_table <- as.data.frame(table(opportunity$LEADSOURCE))
 ls_table$reorg <- ifelse(ls_table$Freq <= 15,"Other", "Drop")
 ls_table2 <- ls_table[ls_table$reorg=="Other", ]
-ls_table2$lead_source
-opportunity$LEADSOURCECLEAN[opportunity$LEADSOURCECLEAN%in%ls_table2$lead_source] <- "Other"
-
-#filter to only relevant dates
-
+ls_table2
+ls_table2$Var1
+opportunity$LEADSOURCECLEAN[opportunity$LEADSOURCECLEAN%in%ls_table2$Var1] <- "Other"
 
 # Modeling=======================================================================================================================
 
@@ -124,16 +123,34 @@ roc.curve(opportunity$WON__C, predlog) #error "Error in if (auc < 0.5) { : missi
 # ------------------------------------------------------------------------
 # Random Forest
 
+# create training dataset
 train_m2 <- train_m1
 glimpse(train_m2)
 train_m2$WON__C <- as.factor(train_m2$WON__C)
 train_m2 <- as.data.frame(train_m2)
 
-names(train_m2)
+# set baseline
+wl = table(train_m2$WON__C)
+win_pct = wl[2]/sum(wl)
+win_pct
 
-rf <- randomForest(WON__C ~ LEADSOURCECLEAN + Code_1 + Code_2 + Code_industry + ACCOUNT_TIER__C + ACCOUNT_TYPE__C + CUSTOMER_CLASSIFICATION__C + CREDIT_LIMIT_ESTABLISHED__C + BIG_DEAL_APPROVAL__C + CORE_RECORD_TYPE__C + MATERIAL_SAMPLES_APPROVAL_STATUS__C + QUALIFICATION_APPROVAL_STATUS__C + ENTERPRISE_ACCOUNT__C_x + CORE_RECORD_TYPE__C
-                   , data = train_m2, na.action=na.exclude, importance=T)
+str(train_m2)
+train_m2$OPENTIME[1]
+
+table(opportunity$LEADSOURCECLEAN)
+
+start_time <- Sys.time()
+rf <- randomForest(WON__C ~ Code_industry + ACCOUNT_TIER__C + ACCOUNT_TYPE__C + CUSTOMER_CLASSIFICATION__C + CREDIT_LIMIT_ESTABLISHED__C + CORE_RECORD_TYPE__C + QUALIFICATION_APPROVAL_STATUS__C + OPENTIME + LASTACTTIME
+                   , data = opportunity, na.action=na.exclude, importance=T)
 print(rf)
 varImpPlot(rf, type=1)
+end_time <- Sys.time()
+print(end_time - start_time)
 View(importance(rf, type=1))
 rf
+
+maxtime = max(opportunity$OPENTIME)
+mintime = min(opportunity$OPENTIME)
+hist(opportunity$OPENTIME, breaks=(maxtime-mintime)/30)
+
+str(train_m2)

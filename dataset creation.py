@@ -96,6 +96,10 @@ Contact = ["ACCOUNTID",
            "CONTACT_STATUS__C",
            "LEVEL_OF_ENGAGEMENT__C",
            "OPT_OUT_OF_SURVEY__C"]
+CrossSellingProgram = ["OPPORTUNITY__C",
+                       "CROSS_SELL_TYPE__C",
+                       "STAGE__C",
+                       "ASSIGN_SALES_REP__C"]
 CustomerSurvey_ActionItem = ["OWNERID",
                              "ISDELETED",
                              "NAME",
@@ -120,7 +124,8 @@ Event = ["WHOCOUNT",
          "ISRECURRENCE",
          "ISREMINDERSET",
          "DB_ACTIVITY_TYPE__C"]
-Opportunity = ["ACCOUNTID",
+Opportunity = ["ID",
+               "ACCOUNTID",
                "ISPRIVATE",
                "NAME",
                "DESCRIPTION",
@@ -211,7 +216,8 @@ Opportunity = ["ACCOUNTID",
                "LOST__C",
                "WON__C",
                "CORE_RECORD_TYPE__C",
-               "MPS_PRODUCTS_WITH_TONS_COUNT__C"]
+               "MPS_PRODUCTS_WITH_TONS_COUNT__C",
+               "FLD_MARKET_SEGMENT__C"]
 Task = ["SUBJECT",
         "ACTIVITYDATE",
         "STATUS",
@@ -251,6 +257,7 @@ CustomerSurvey_ActionItem_df = d['CustomerSurvey_ActionItem']
 Event_df = d['Event']
 Opportunity_df = d['Opportunity']
 Task_df = d['Task']
+CrossSell_df = d['CrossSellingProgram']
 Ind_df = d['industry_index']
 NAICS_df = d['NAICS_code_index']
 
@@ -262,10 +269,17 @@ CustomerSurvey_ActionItem_df = CustomerSurvey_ActionItem_df.loc[:, CustomerSurve
 Event_df = Event_df.loc[:, Event]
 Opportunity_df = Opportunity_df.loc[:, Opportunity]
 Task_df = Task_df.loc[:, Task]
+CrossSell_df = CrossSell_df.loc[:, CrossSellingProgram]
 
-Oppty_Acct1 = pd.merge(Oppty_df, Account_df, left_on="ACCOUNTID", right_on="ACCOUNT_ID__C", how="left")
+Opportunity_df["OPENTIME"] = (pd.to_numeric(pd.to_datetime(Opportunity_df["CLOSEDATE"],yearfirst=True)) - pd.to_numeric(pd.to_datetime(Opportunity_df["CREATEDDATE"],yearfirst=True)))/1000000000/60/60/24
+Opportunity_df["LASTACTTIME"] =  (pd.to_numeric(pd.to_datetime(Opportunity_df["LASTACTIVITYDATE"],yearfirst=True)) - pd.to_numeric(pd.to_datetime(Opportunity_df["CREATEDDATE"],yearfirst=True)))/1000000000/60/60/24
+
+print(Opportunity_df["OPENTIME"][0])
+
+Oppty_Acct1 = pd.merge(Opportunity_df, Account_df, left_on="ACCOUNTID", right_on="ACCOUNT_ID__C", how="left")
 Oppty_Acct2 = pd.merge(Oppty_Acct1, Ind_df, left_on="INDUSTRY__C", right_on="industry", how="left")
-Oppty_Acct_df = pd.merge(Oppty_Acct2, NAICS_df, on="NAICS_CODE__C", how="left")
+Oppty_Acct3 = pd.merge(Oppty_Acct2, NAICS_df, on="NAICS_CODE__C", how="left")
+Oppty_Acct_df = pd.merge(Oppty_Acct3, CrossSell_df, left_on="ID",right_on="OPPORTUNITY__C", how="left")
 
 print(AccountPlan_df.shape)
 print(Account_df.shape)
