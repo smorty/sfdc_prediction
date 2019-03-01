@@ -59,6 +59,8 @@ opportunity1$CREATEDDATE = as_date(opportunity1$CREATEDDATE)
 date_filter = ymd("2016-04-01")
 opportunity = opportunity1 %>% filter(CREATEDDATE >= date_filter)
 
+opportunity2 = opportunity %>% filter(OPENTIME > 0)
+
 #drop unnecessary variables
 drops <- c("STAGENAME", "PROBABILITY","DESCRIPTION","NEXTSTEP","CURRENCYISOCODE", "CRITICAL_BUSINESS_ISSUES__C", "CUSTOMER_HOT_BUTTONS__C", "CUSTOMER_PRESSURES_DESCRIPTION__C", "OPPORTUNITY_OWNER_MANAGER_EMAIL_FORMULA__C", "INDUSTRY__C", "PAPERBOARD_SUBSTRATES_UTILIZED__C", "REGION__C", "AREA__C", "DIVISION__C", "OPPORTUNITY_DIVISION__C", "SHIP_TO_STATE__C", "CLOSED__C", "CREATEDDATE", "CLOSEDATE", "LASTACTIVITYDATE", "STAGE_CHANGE_DATE_STAMP__C")
 opportunity <- opportunity[ , !(names(opportunity) %in% drops)]
@@ -102,10 +104,12 @@ intrain_m <- createDataPartition(opportunity$WON__C, p = 0.5, list = FALSE)
 train_m1 <- opportunity[intrain_m, ] # train_m1: train, monthly, train set 1
 validation_m1 <- opportunity[-intrain_m, ] # validation_m1: validation, monthly, validation set 1
 
-table(train_m1$LEADSOURCECLEAN)
-table(validation_m1$LEADSOURCECLEAN)
+# set baseline
+wl = table(opportunity$WON__C)
+win_pct = wl[2]/sum(wl)
+win_pct
 
-opportunity.glm <- glm(WON__C ~ AMOUNT + factor(Code_1) + factor(Code_2) + factor(Code_industry) + factor(ACCOUNT_TIER__C) + factor(ACCOUNT_TYPE__C) + factor(CUSTOMER_CLASSIFICATION__C) + factor(LEADSOURCECLEAN) + factor(CREDIT_LIMIT_ESTABLISHED__C) + factor(BIG_DEAL_APPROVAL__C) + factor(CORE_RECORD_TYPE__C) + factor(MATERIAL_SAMPLES_APPROVAL_STATUS__C) + factor(QUALIFICATION_APPROVAL_STATUS__C) + factor(ENTERPRISE_ACCOUNT__C_x) + factor(CORE_RECORD_TYPE__C)
+opportunity.glm <- glm(WON__C ~ Code_industry + Code_2 + ACCOUNT_TIER__C + ACCOUNT_TYPE__C + CUSTOMER_CLASSIFICATION__C + CREDIT_LIMIT_ESTABLISHED__C + CORE_RECORD_TYPE__C + QUALIFICATION_APPROVAL_STATUS__C + OPENTIME + LASTACTTIME
                        , data = train_m1, family=binomial(link = "logit"))
 summary(opportunity.glm)
 # AIC: 43628
@@ -116,18 +120,22 @@ conf_mat
 
 conf_mat[1,1]/(sum(conf_mat[1,])) #0.7461687 - 1/23/2019 0.8428346 - 2/27/2019 0.7192964
 conf_mat[2,2]/(sum(conf_mat[2,])) #0.646136 - 1/23/2019 0.6439109 - 2/27/2019 0.670183
+(conf_mat[1,1] + conf_mat[2,2])/sum(conf_mat)
 
 predlog <- predict(opportunity.glm, newdata = opportunity)
-roc.curve(opportunity$WON__C, predlog) #error "Error in if (auc < 0.5) { : missing value where TRUE/FALSE needed", need to check with Karen
+roc.curve(opportunity$WON__C, predlog) 
 
 # ------------------------------------------------------------------------
 # Random Forest
 
 # create training dataset
 train_m2 <- train_m1
+validation_m2 <- validation_m1
 glimpse(train_m2)
 train_m2$WON__C <- as.factor(train_m2$WON__C)
 train_m2 <- as.data.frame(train_m2)
+validation_m2 <- as.data.frame(validation_m2)
+validation_m2$WON__C <- as.factor(validation_m2$WON__C)
 
 # set baseline
 wl = table(train_m2$WON__C)
@@ -149,8 +157,15 @@ print(end_time - start_time)
 View(importance(rf, type=1))
 rf
 
-maxtime = max(opportunity$OPENTIME)
-mintime = min(opportunity$OPENTIME)
-hist(opportunity$OPENTIME, breaks=(maxtime-mintime)/30)
+predict.rf <- predict(rf, validation_m2, predict.all=TRUE)$aggregate
+conf_mat.rf <- table(validation_m2$WON__C, predict.rf > 0.55)
+conf_mat.rf
 
-str(train_m2)
+conf_mat.rf[1,1]/(sum(conf_mat.rf[1,])) 
+conf_mat.rf[2,2]/(sum(conf_mat.rf[2,])) 
+(conf_mat.rf[1,1] + conf_mat.rf[2,2])/sum(conf_mat.rf)
+
+predict.rf.full <- predict(rf, opportunity, predict.all=TRUE)$aggregate
+roc.curve(opportunity$WON__C, predict.rf.full) 
+
+ggplot(opportunity, aes(x=OPENTIME)) + geom_histogram(binwidth=5)
