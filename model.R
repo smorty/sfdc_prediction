@@ -125,8 +125,8 @@ conf_mat[2,2]/(sum(conf_mat[2,])) #0.646136 - 1/23/2019 0.6439109 - 2/27/2019 0.
 predlog <- predict(opportunity.glm, newdata = opportunity)
 roc.curve(opportunity$WON__C, predlog) 
 
-table(opportunity$RECORDTYPEID)
-table(paste(opportunity$))
+length(table(opportunity$RECORDTYPEID))
+length(table(paste(opportunity$DIVISION__C,opportunity$CORE_RECORD_TYPE__C)))
 
 # ------------------------------------------------------------------------
 # Random Forest
