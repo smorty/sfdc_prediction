@@ -62,7 +62,7 @@ opportunity = opportunity1 %>% filter(CREATEDDATE >= date_filter)
 opportunity2 = opportunity %>% filter(OPENTIME > 0)
 
 #drop unnecessary variables
-drops <- c("STAGENAME", "PROBABILITY","DESCRIPTION","NEXTSTEP","CURRENCYISOCODE", "CRITICAL_BUSINESS_ISSUES__C", "CUSTOMER_HOT_BUTTONS__C", "CUSTOMER_PRESSURES_DESCRIPTION__C", "OPPORTUNITY_OWNER_MANAGER_EMAIL_FORMULA__C", "INDUSTRY__C", "PAPERBOARD_SUBSTRATES_UTILIZED__C", "REGION__C", "AREA__C", "DIVISION__C", "OPPORTUNITY_DIVISION__C", "SHIP_TO_STATE__C", "CLOSED__C", "CREATEDDATE", "CLOSEDATE", "LASTACTIVITYDATE", "STAGE_CHANGE_DATE_STAMP__C")
+drops <- c("STAGENAME", "PROBABILITY","DESCRIPTION","NEXTSTEP","CURRENCYISOCODE", "CRITICAL_BUSINESS_ISSUES__C", "CUSTOMER_HOT_BUTTONS__C", "CUSTOMER_PRESSURES_DESCRIPTION__C", "OPPORTUNITY_OWNER_MANAGER_EMAIL_FORMULA__C", "INDUSTRY__C", "PAPERBOARD_SUBSTRATES_UTILIZED__C", "REGION__C", "AREA__C", "OPPORTUNITY_DIVISION__C", "SHIP_TO_STATE__C", "CLOSED__C", "CREATEDDATE", "CLOSEDATE", "LASTACTIVITYDATE", "STAGE_CHANGE_DATE_STAMP__C")
 opportunity <- opportunity[ , !(names(opportunity) %in% drops)]
 
 #group LeadSource values
@@ -125,6 +125,9 @@ conf_mat[2,2]/(sum(conf_mat[2,])) #0.646136 - 1/23/2019 0.6439109 - 2/27/2019 0.
 predlog <- predict(opportunity.glm, newdata = opportunity)
 roc.curve(opportunity$WON__C, predlog) 
 
+table(opportunity$RECORDTYPEID)
+table(paste(opportunity$))
+
 # ------------------------------------------------------------------------
 # Random Forest
 
@@ -151,7 +154,7 @@ start_time <- Sys.time()
 rf <- randomForest(WON__C ~ Code_industry + ACCOUNT_TIER__C + ACCOUNT_TYPE__C + CUSTOMER_CLASSIFICATION__C + CREDIT_LIMIT_ESTABLISHED__C + CORE_RECORD_TYPE__C + QUALIFICATION_APPROVAL_STATUS__C + OPENTIME + LASTACTTIME
                    , data = opportunity, na.action=na.exclude, importance=T)
 print(rf)
-varImpPlot(rf, type=1)
+varImpPlot(rf, type=1, color="black", lcolor="black")
 end_time <- Sys.time()
 print(end_time - start_time)
 View(importance(rf, type=1))
@@ -168,4 +171,4 @@ conf_mat.rf[2,2]/(sum(conf_mat.rf[2,]))
 predict.rf.full <- predict(rf, opportunity, predict.all=TRUE)$aggregate
 roc.curve(opportunity$WON__C, predict.rf.full) 
 
-ggplot(opportunity, aes(x=OPENTIME)) + geom_histogram(binwidth=5)
+ggplot(opportunity, aes(x=OPENTIME)) + geom_histogram(color="black",fill="gray",binwidth=30)

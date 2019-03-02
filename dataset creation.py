@@ -217,7 +217,8 @@ Opportunity = ["ID",
                "WON__C",
                "CORE_RECORD_TYPE__C",
                "MPS_PRODUCTS_WITH_TONS_COUNT__C",
-               "FLD_MARKET_SEGMENT__C"]
+               "FLD_MARKET_SEGMENT__C",
+               "RECORDTYPEID"]
 Task = ["SUBJECT",
         "ACTIVITYDATE",
         "STATUS",
