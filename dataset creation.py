@@ -10,6 +10,7 @@ import os
 import pandas as pd
 import numpy as np
 import xlwings as xw
+import matplotlib.pyplot as plt
 
 pd.set_option('display.max_columns',20)
 
@@ -57,8 +58,7 @@ AccountPlan = ["OWNERID",
                "WEAKNESSES__C",
                "REGION__C",
                "COUNT_OF_CUSTOMER_ENGAGEMENT_ON_ACCOUNT__C"]
-Account = ["ID"
-           "NAME",
+Account = ["NAME",
            "BILLINGCOUNTRY",
            "INDUSTRY",
            "ANNUALREVENUE",
@@ -71,7 +71,8 @@ Account = ["ID"
            "ENTERPRISE_ACCOUNT__C",
            "FOLDING_CARTON_CUSTOMER__C",
            "SALES_OPS_LEAD__C",
-           "CLUSTER__C"]
+           "CLUSTER__C",
+           "TASK_COUNT"]
 CallReport = ["ID",
               "OWNERID",
               "NAME",
@@ -218,7 +219,8 @@ Opportunity = ["ID",
                "CORE_RECORD_TYPE__C",
                "MPS_PRODUCTS_WITH_TONS_COUNT__C",
                "FLD_MARKET_SEGMENT__C",
-               "RECORDTYPEID"]
+               "RECORDTYPEID",
+               "FIELDS_COMPLETED"]
 Task = ["SUBJECT",
         "ACTIVITYDATE",
         "STATUS",
@@ -250,36 +252,45 @@ Task = ["SUBJECT",
         "ISDC_INBOUND_CALL_ANSWERED__C"]
 
 # 3. extract tables with selected variables from database ---------------------
-AccountPlan_df = d['AccountPlan']
-Account_df = d['Account']
-CallReport_df = d['CallReport']
-Contact_df = d['Contact']
-CustomerSurvey_ActionItem_df = d['CustomerSurvey_ActionItem']
-Event_df = d['Event']
-Opportunity_df = d['Opportunity']
-Task_df = d['Task']
-CrossSell_df = d['CrossSellingProgram']
-Ind_df = d['industry_index']
-NAICS_df = d['NAICS_code_index']
+AccountPlan_raw = d['AccountPlan']
+Account_raw = d['Account']
+CallReport_raw = d['CallReport']
+Contact_raw = d['Contact']
+CustomerSurvey_ActionItem_raw = d['CustomerSurvey_ActionItem']
+Event_raw = d['Event']
+Opportunity_raw = d['Opportunity']
+Task_raw = d['Task']
+CrossSell_raw = d['CrossSellingProgram']
+Ind_raw = d['industry_index']
+NAICS_raw = d['NAICS_code_index']
 
-AccountPlan_df = AccountPlan_df.loc[:, AccountPlan]
-Account_df = Account_df.loc[:, Account]
-CallReport_df = CallReport_df.loc[:, CallReport]
-Contact_df = Contact_df.loc[:, Contact]
-CustomerSurvey_ActionItem_df = CustomerSurvey_ActionItem_df.loc[:, CustomerSurvey_ActionItem]
-Event_df = Event_df.loc[:, Event]
-Opportunity_df = Opportunity_df.loc[:, Opportunity]
-Task_df = Task_df.loc[:, Task]
-CrossSell_df = CrossSell_df.loc[:, CrossSellingProgram]
+flds_cmplt = len(Opportunity_raw.columns.values) - Opportunity_raw.isnull().sum(axis=1)
+min_cmplt = min(flds_cmplt)
+range_cmplt = max(flds_cmplt) - min_cmplt
+
+Opportunity_raw['FIELDS_COMPLETED'] = flds_cmplt - min_cmplt
+
+Task_count = Task_raw.groupby(by='ACCOUNTID', as_index=False).agg({'ID': pd.Series.count})
+Task_count.rename(columns={'ID': 'TASK_COUNT'}, inplace=True)
+Account_raw = pd.merge(Account_raw, Task_count, left_on="ID", right_on="ACCOUNTID", how="left")
+
+AccountPlan_df = AccountPlan_raw.loc[:, AccountPlan]
+Account_df = Account_raw.loc[:, Account]
+CallReport_df = CallReport_raw.loc[:, CallReport]
+Contact_df = Contact_raw.loc[:, Contact]
+CustomerSurvey_ActionItem_df = CustomerSurvey_ActionItem_raw.loc[:, CustomerSurvey_ActionItem]
+Event_df = Event_raw.loc[:, Event]
+Opportunity_df = Opportunity_raw.loc[:, Opportunity]
+Task_df = Task_raw.loc[:, Task]
+CrossSell_df = CrossSell_raw.loc[:, CrossSellingProgram]
 
 Opportunity_df["OPENTIME"] = (pd.to_numeric(pd.to_datetime(Opportunity_df["CLOSEDATE"],yearfirst=True)) - pd.to_numeric(pd.to_datetime(Opportunity_df["CREATEDDATE"],yearfirst=True)))/1000000000/60/60/24
 Opportunity_df["LASTACTTIME"] =  (pd.to_numeric(pd.to_datetime(Opportunity_df["LASTACTIVITYDATE"],yearfirst=True)) - pd.to_numeric(pd.to_datetime(Opportunity_df["CREATEDDATE"],yearfirst=True)))/1000000000/60/60/24
-
-print(Opportunity_df["OPENTIME"][0])
+Opportunity_df["VALID_OPENTIME"] = (Opportunity_df.OPENTIME > 0).astype(int)
 
 Oppty_Acct1 = pd.merge(Opportunity_df, Account_df, left_on="ACCOUNTID", right_on="ACCOUNT_ID__C", how="left")
-Oppty_Acct2 = pd.merge(Oppty_Acct1, Ind_df, left_on="INDUSTRY__C", right_on="industry", how="left")
-Oppty_Acct3 = pd.merge(Oppty_Acct2, NAICS_df, on="NAICS_CODE__C", how="left")
+Oppty_Acct2 = pd.merge(Oppty_Acct1, Ind_raw, left_on="INDUSTRY__C", right_on="industry", how="left")
+Oppty_Acct3 = pd.merge(Oppty_Acct2, NAICS_raw, on="NAICS_CODE__C", how="left")
 Oppty_Acct_df = pd.merge(Oppty_Acct3, CrossSell_df, left_on="ID",right_on="OPPORTUNITY__C", how="left")
 
 print(AccountPlan_df.shape)
