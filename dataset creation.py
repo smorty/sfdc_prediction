@@ -4,7 +4,7 @@ Created on Thu Oct 18 16:00:04 2018
 
 @author: MortensenS19
 """
-# 1. read data from xlsx files ------------------------------------------------
+# Read data from files ----------------------------------------------------------
 
 import os
 import pandas as pd
@@ -34,7 +34,7 @@ for x in d:
 for key, value in d.items():
     print(key,"Row:" + str(value.shape[0]), "Variable:" + str(value.shape[1]))
 
-# 2. selected variable lists --------------------------------------------------
+# Create variable lists ---------------------------------------------------------
 AccountPlan = ["OWNERID",
                "ISDELETED",
                "NAME",
@@ -220,7 +220,11 @@ Opportunity = ["ID",
                "MPS_PRODUCTS_WITH_TONS_COUNT__C",
                "FLD_MARKET_SEGMENT__C",
                "RECORDTYPEID",
-               "FIELDS_COMPLETED"]
+               "FIELDS_COMPLETED",
+               "OPENTIME",
+               "LASTACTTIME",
+               "VALID_OPENTIME",
+               "QUALIFICATION_APPROVAL_NA"]
 Task = ["SUBJECT",
         "ACTIVITYDATE",
         "STATUS",
@@ -248,10 +252,9 @@ Task = ["SUBJECT",
         "DIVISION__C",
         "REGION__C",
         "ACTIVITY_TYPE__C",
-        "QBDIALER__CALL_LEAD_STATUS__C",
         "ISDC_INBOUND_CALL_ANSWERED__C"]
 
-# 3. extract tables with selected variables from database ---------------------
+# Extract tables from imported data --------------------------------------------
 AccountPlan_raw = d['AccountPlan']
 Account_raw = d['Account']
 CallReport_raw = d['CallReport']
@@ -264,16 +267,30 @@ CrossSell_raw = d['CrossSellingProgram']
 Ind_raw = d['industry_index']
 NAICS_raw = d['NAICS_code_index']
 
+# Create new variables, tables --------------------------------------------------
+
+# Create completed field count variable
 flds_cmplt = len(Opportunity_raw.columns.values) - Opportunity_raw.isnull().sum(axis=1)
 min_cmplt = min(flds_cmplt)
 range_cmplt = max(flds_cmplt) - min_cmplt
-
 Opportunity_raw['FIELDS_COMPLETED'] = flds_cmplt - min_cmplt
 
+# Create account-level task count variable
 Task_count = Task_raw.groupby(by='ACCOUNTID', as_index=False).agg({'ID': pd.Series.count})
 Task_count.rename(columns={'ID': 'TASK_COUNT'}, inplace=True)
 Account_raw = pd.merge(Account_raw, Task_count, left_on="ID", right_on="ACCOUNTID", how="left")
 
+# Create age-related variables
+Opportunity_raw["OPENTIME"] = (pd.to_numeric(pd.to_datetime(Opportunity_raw["CLOSEDATE"],yearfirst=True)) - pd.to_numeric(pd.to_datetime(Opportunity_raw["CREATEDDATE"],yearfirst=True)))/1000000000/60/60/24
+Opportunity_raw["LASTACTTIME"] =  (pd.to_numeric(pd.to_datetime(Opportunity_raw["LASTACTIVITYDATE"],yearfirst=True)) - pd.to_numeric(pd.to_datetime(Opportunity_raw["CREATEDDATE"],yearfirst=True)))/1000000000/60/60/24
+Opportunity_raw["VALID_OPENTIME"] = (Opportunity_raw.OPENTIME > 0).astype(int)
+
+# Group infrequent levels of variables, filter some small anomalies
+Opportunity_raw["QUALIFICATION_APPROVAL_NA"] = Opportunity_raw["QUALIFICATION_APPROVAL_STATUS__C"].isna()
+Opportunity_raw = Opportunity_raw[Opportunity_raw['ENTERPRISE_ACCOUNT__C'] != "$1MM * 2 Segments"]
+Account_raw = Account_raw[Account_raw["CUSTOMER_CLASSIFICATION__C"] != "Global"]
+
+# Limit variables to just those specified above
 AccountPlan_df = AccountPlan_raw.loc[:, AccountPlan]
 Account_df = Account_raw.loc[:, Account]
 CallReport_df = CallReport_raw.loc[:, CallReport]
@@ -284,15 +301,21 @@ Opportunity_df = Opportunity_raw.loc[:, Opportunity]
 Task_df = Task_raw.loc[:, Task]
 CrossSell_df = CrossSell_raw.loc[:, CrossSellingProgram]
 
-Opportunity_df["OPENTIME"] = (pd.to_numeric(pd.to_datetime(Opportunity_df["CLOSEDATE"],yearfirst=True)) - pd.to_numeric(pd.to_datetime(Opportunity_df["CREATEDDATE"],yearfirst=True)))/1000000000/60/60/24
-Opportunity_df["LASTACTTIME"] =  (pd.to_numeric(pd.to_datetime(Opportunity_df["LASTACTIVITYDATE"],yearfirst=True)) - pd.to_numeric(pd.to_datetime(Opportunity_df["CREATEDDATE"],yearfirst=True)))/1000000000/60/60/24
-Opportunity_df["VALID_OPENTIME"] = (Opportunity_df.OPENTIME > 0).astype(int)
-
+# Merge opportunities, accounts, cross-selling data, and industry lookups
 Oppty_Acct1 = pd.merge(Opportunity_df, Account_df, left_on="ACCOUNTID", right_on="ACCOUNT_ID__C", how="left")
 Oppty_Acct2 = pd.merge(Oppty_Acct1, Ind_raw, left_on="INDUSTRY__C", right_on="industry", how="left")
 Oppty_Acct3 = pd.merge(Oppty_Acct2, NAICS_raw, on="NAICS_CODE__C", how="left")
-Oppty_Acct_df = pd.merge(Oppty_Acct3, CrossSell_df, left_on="ID",right_on="OPPORTUNITY__C", how="left")
+Oppty_Acct4 = pd.merge(Oppty_Acct3, CrossSell_df, left_on="ID",right_on="OPPORTUNITY__C", how="left")
 
+# Filter data to only relevant dates, after 2016-04-01
+Oppty_Acct_df = Oppty_Acct4[(Oppty_Acct4['CREATEDDATE'] >= '2016-04-01')]
+
+# Remove some more pesky NA's
+Oppty_Acct_df = Oppty_Acct_df[Oppty_Acct_df['ACCOUNT_TIER__C'].notna()]
+
+# Write data to csv -----------------------------------------------------------
+
+# Check dimensions of data
 print(AccountPlan_df.shape)
 print(Account_df.shape)
 print(CallReport_df.shape)
@@ -303,6 +326,7 @@ print(Opportunity_df.shape)
 print(Task_df.shape)
 print(Oppty_Acct_df.shape)
 
+# Write data to csvs
 AccountPlan_df.to_csv(path+"\\AccountPlan_df.csv")
 print("Wrote AccountPlan to file.")
 Account_df.to_csv(path+"\\Account_df.csv")
@@ -322,7 +346,7 @@ print("Wrote Task to file.")
 Oppty_Acct_df.to_csv(path+"\\Oppty_Acct_df.csv")
 print("Wrote Oppty Acct to file.")
 
-# 4. create three tables ------------------------------------------------------
+# Old stuff around creating new tables -----------------------------------------
 # 1) Initial Info: Account, AccountPlan, Contact
 # PK: ACCOUNT_ID__C, ANNUALREVENUE, NAME, OWNERID from Account
 # left = Account_df
