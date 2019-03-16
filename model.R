@@ -26,7 +26,7 @@ features = c("AMOUNT",
              "TYPE",
              "CORE_RECORD_TYPE__C",
              "ENTERPRISE_ACCOUNT__C_x",
-             "ANNUALREVENUE",
+             # "ANNUALREVENUE",
              "ACCOUNT_TIER__C",
              "ACCOUNT_TYPE__C",
              "CUSTOMER_CLASSIFICATION__C",
@@ -35,9 +35,14 @@ features = c("AMOUNT",
              "VALID_OPENTIME",
              "FIELDS_COMPLETED",
              "QUALIFICATION_APPROVAL_NA",
-             "TASK_COUNT")
+             "TASK_COUNT",
+             "DIVISION__C")
 all_variables = append(target,features)
 data = data_closed %>% select(all_variables)
+
+table(is.na(data$ANNUALREVENUE))
+table(is.na(data$AMOUNT))
+table(data$CREDIT_LIMIT_ESTABLISHED__C)
 
 # Create test and train sets
 set.seed(123)

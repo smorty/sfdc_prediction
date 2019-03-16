@@ -289,6 +289,7 @@ Opportunity_raw["VALID_OPENTIME"] = (Opportunity_raw.OPENTIME > 0).astype(int)
 Opportunity_raw["QUALIFICATION_APPROVAL_NA"] = Opportunity_raw["QUALIFICATION_APPROVAL_STATUS__C"].isna()
 Opportunity_raw = Opportunity_raw[Opportunity_raw['ENTERPRISE_ACCOUNT__C'] != "$1MM * 2 Segments"]
 Account_raw = Account_raw[Account_raw["CUSTOMER_CLASSIFICATION__C"] != "Global"]
+Opportunity_raw["DIVISION__C"][Opportunity_raw.DIVISION__C.isin(["Corporate","CBM","HHB","ENT","RCY"])] = "Other"
 
 # Limit variables to just those specified above
 AccountPlan_df = AccountPlan_raw.loc[:, AccountPlan]
@@ -312,6 +313,12 @@ Oppty_Acct_df = Oppty_Acct4[(Oppty_Acct4['CREATEDDATE'] >= '2016-04-01')]
 
 # Remove some more pesky NA's
 Oppty_Acct_df = Oppty_Acct_df[Oppty_Acct_df['ACCOUNT_TIER__C'].notna()]
+
+# Impute NA's
+Oppty_Acct_df['TASK_COUNT'][Oppty_Acct_df['TASK_COUNT'].isna()] = 0
+Oppty_Acct_df['ANNUALREVENUE'][Oppty_Acct_df['ANNUALREVENUE'].isna()] = 0
+
+Opportunity_df.DIVISION__C.value_counts()
 
 # Write data to csv -----------------------------------------------------------
 
