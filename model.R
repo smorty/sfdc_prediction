@@ -103,10 +103,9 @@ sum(conf_mat.rf)/nrow(test)
 
 #Division-level Modeling=======================================================================================================
 
-# Random forest
+# Identify divisions, specify variables by division
 divisions = levels(data$DIVISION__C)
-BEV_variables = c("WON__C",
-                  "AMOUNT",
+BEV_variables = c("AMOUNT",
                   "Code_1",
                   "CREDIT_LIMIT_ESTABLISHED__C",
                   "TYPE",
@@ -124,8 +123,7 @@ BEV_variables = c("WON__C",
                   "TASK_COUNT",
                   "Code_2",
                   "Code_industry")
-BRA_variables = c("WON__C",
-                  "AMOUNT",
+BRA_variables = c("AMOUNT",
                   "Code_1",
                   "CREDIT_LIMIT_ESTABLISHED__C",
                   "TYPE",
@@ -143,8 +141,7 @@ BRA_variables = c("WON__C",
                   "TASK_COUNT",
                   "Code_2",
                   "Code_industry")
-COR_variables = c("WON__C",
-                  "AMOUNT",
+COR_variables = c("AMOUNT",
                   "Code_1",
                   "CREDIT_LIMIT_ESTABLISHED__C",
                   "TYPE",
@@ -181,8 +178,7 @@ FLD_variables = c("WON__C",
                   "TASK_COUNT",
                   "Code_2",
                   "Code_industry")
-MD_variables = c("WON__C",
-                 "AMOUNT",
+MD_variables = c("AMOUNT",
                  "Code_1",
                  "CREDIT_LIMIT_ESTABLISHED__C",
                  "TYPE",
@@ -200,8 +196,7 @@ MD_variables = c("WON__C",
                  "TASK_COUNT",
                  "Code_2",
                  "Code_industry")
-MPS_variables = c("WON__C",
-                  "AMOUNT",
+MPS_variables = c("AMOUNT",
                   "Code_1",
                   "CREDIT_LIMIT_ESTABLISHED__C",
                   "TYPE",
@@ -219,8 +214,7 @@ MPS_variables = c("WON__C",
                   "TASK_COUNT",
                   "Code_2",
                   "Code_industry")
-Other_variables = c("WON__C",
-                    "AMOUNT",
+Other_variables = c("AMOUNT",
                     "Code_1",
                     "CREDIT_LIMIT_ESTABLISHED__C",
                     "TYPE",
@@ -238,8 +232,7 @@ Other_variables = c("WON__C",
                     "TASK_COUNT",
                     "Code_2",
                     "Code_industry")
-PPD_variables = c("WON__C",
-                  "AMOUNT",
+PPD_variables = c("AMOUNT",
                   "Code_1",
                   "CREDIT_LIMIT_ESTABLISHED__C",
                   "TYPE",
@@ -257,8 +250,7 @@ PPD_variables = c("WON__C",
                   "TASK_COUNT",
                   "Code_2",
                   "Code_industry")
-RTS_variables = c("WON__C",
-                  "AMOUNT",
+RTS_variables = c("AMOUNT",
                   "Code_1",
                   "CREDIT_LIMIT_ESTABLISHED__C",
                   "TYPE",
@@ -285,19 +277,26 @@ variables = list("BEV"=BEV_variables,
              "Other"=Other_variables,
              "PPD"=PPD_variables,
              "RTS"=RTS_variables)
+
+# Initialize accuracy and importance lists
 loss_acc = list()
 win_acc = list()
 total_acc = list()
 importance = list()
+
+# Loop through random forest model for each division
 start.time = Sys.time()
 for(i in 1:length(divisions)){
   print(divisions[i])
-  data.tmp = data_closed %>% select(variables[[divisions[i]]]) %>% filter(DIVISION__C == divisions[i])
+  # Select variables and filter data by division
+  data.tmp = data_closed %>% select(append(target,variables[[divisions[i]]])) %>% filter(DIVISION__C == divisions[i])
   print(sprintf("%i rows",nrow(data.tmp)))
+  # Create training and testing data
   set.seed(123)
   train_idx.tmp = createDataPartition(data.tmp$WON__C, p = 0.5, list=FALSE)
   train.tmp = data.tmp[train_idx.tmp,]
   test.tmp = data.tmp[-train_idx.tmp,]
+  # Run random forest model (and time it)
   rf.start.time = Sys.time()
   train.rf = randomForest(WON__C ~ .,
                           data = train.tmp, na.action=na.exclude, importance=T)
