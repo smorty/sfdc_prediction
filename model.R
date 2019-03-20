@@ -289,7 +289,7 @@ start.time = Sys.time()
 for(i in 1:length(divisions)){
   print(divisions[i])
   # Select variables and filter data by division
-  data.tmp = data_closed %>% select(append(target,variables[[divisions[i]]])) %>% filter(DIVISION__C == divisions[i])
+  data.tmp = data_closed %>% filter(DIVISION__C == divisions[i]) %>% select(append(target,variables[[divisions[i]]]))
   print(sprintf("%i rows",nrow(data.tmp)))
   # Create training and testing data
   set.seed(123)
