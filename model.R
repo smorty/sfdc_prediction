@@ -13,6 +13,8 @@ library(randomForest)
 
 data_raw <- read.csv("Oppty_Acct_df.csv")
 
+summary(data$AMOUNT)
+
 # Preprocessing==================================================================================================================
 
 # Filter to only closed deals
@@ -20,9 +22,9 @@ data_closed = data_raw %>% filter(CLOSED__C==1)
 
 # Select relevant variables
 target = c("WON__C")
-features = c("AMOUNT",
-             "Code_1",
-             "CREDIT_LIMIT_ESTABLISHED__C",
+features = c(# "AMOUNT",
+             # "Code_1",
+             # "CREDIT_LIMIT_ESTABLISHED__C",
              "TYPE",
              "CORE_RECORD_TYPE__C",
              "ENTERPRISE_ACCOUNT__C_x",
@@ -30,16 +32,15 @@ features = c("AMOUNT",
              "ACCOUNT_TIER__C",
              "ACCOUNT_TYPE__C",
              "CUSTOMER_CLASSIFICATION__C",
-             "OPENTIME",
-             "LASTACTTIME",
-             "VALID_OPENTIME",
-             "FIELDS_COMPLETED",
-             "QUALIFICATION_APPROVAL_NA",
-             "TASK_COUNT",
+             # "OPENTIME",
+             # "LASTACTTIME",
+             # "VALID_OPENTIME",
+             # "FIELDS_COMPLETED",
+             # "QUALIFICATION_APPROVAL_NA",
+             # "TASK_COUNT",
              "DIVISION__C",
              "Code_2",
-             "Code_industry",
-             "FLD_MARKET_SEGMENT__C")
+             "Code_industry")
 table(data_raw$OWNER_REGION__C)
 all_variables = append(target,features)
 data = data_closed %>% select(all_variables)
@@ -159,8 +160,7 @@ COR_variables = c("AMOUNT",
                   "TASK_COUNT",
                   "Code_2",
                   "Code_industry")
-FLD_variables = c("WON__C",
-                  "AMOUNT",
+FLD_variables = c("AMOUNT",
                   "Code_1",
                   "CREDIT_LIMIT_ESTABLISHED__C",
                   "TYPE",
@@ -283,6 +283,10 @@ loss_acc = list()
 win_acc = list()
 total_acc = list()
 importance = list()
+total_loss_true = list()
+total_loss_false = list()
+total_win_true = list()
+total_win_false = list()
 
 # Loop through random forest model for each division
 start.time = Sys.time()
@@ -311,6 +315,10 @@ for(i in 1:length(divisions)){
   predict.rf = predict(train.rf, test.tmp, predict.all=TRUE)$aggregate
   # Confusion matrix
   conf_mat.rf = table(test.tmp$WON__C, predict.rf > 0.55)
+  total_loss_true[divisions[i]] = conf_mat.rf[1,1]
+  total_loss_false[divisions[i]] = conf_mat.rf[1,2]
+  total_win_true[divisions[i]] = conf_mat.rf[2,2]
+  total_win_false[divisions[i]] = conf_mat.rf[2,1]
   print(conf_mat.rf)
   # Loss accuracy
   loss_acc[divisions[i]] = conf_mat.rf[1,1]/sum(conf_mat.rf[1,])
@@ -331,3 +339,5 @@ importance
 loss_acc
 win_acc
 total_acc
+(Reduce("+",total_loss_true) + Reduce("+",total_win_true))/
+  (Reduce("+",total_loss_true) + Reduce("+",total_loss_false) + Reduce("+",total_win_true) + Reduce("+",total_win_false))

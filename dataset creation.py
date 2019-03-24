@@ -319,7 +319,6 @@ Oppty_Acct_df['TASK_COUNT'][Oppty_Acct_df['TASK_COUNT'].isna()] = 0
 Oppty_Acct_df['ANNUALREVENUE'][Oppty_Acct_df['ANNUALREVENUE'].isna()] = 0
 
 Oppty_Acct_df['TASK_COUNT'][Oppty_Acct_df['TASK_COUNT'] != 0].shape
-
 # Write data to csv -----------------------------------------------------------
 
 # Check dimensions of data
