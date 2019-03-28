@@ -1,5 +1,5 @@
-if (getwd() != "C:/Users/MortensenS19/Documents/DSI/Capstone/Data/2019.02.25") {
-  setwd("C:/Users/MortensenS19/Documents/DSI/Capstone/Data/2019.02.25")}
+if (getwd() != "/Users/stephenmortensen/Documents/DSI/Capstone/Data") {
+  setwd("/Users/stephenmortensen/Documents/DSI/Capstone/Data")}
 getwd()
 
 library(readr)
@@ -13,8 +13,6 @@ library(randomForest)
 
 data_raw <- read.csv("Oppty_Acct_df.csv")
 
-summary(data$AMOUNT)
-
 # Preprocessing==================================================================================================================
 
 # Filter to only closed deals
@@ -24,20 +22,17 @@ data_closed = data_raw %>% filter(CLOSED__C==1)
 target = c("WON__C")
 features = c(# "AMOUNT",
              # "Code_1",
-             # "CREDIT_LIMIT_ESTABLISHED__C",
              "TYPE",
              "CORE_RECORD_TYPE__C",
              "ENTERPRISE_ACCOUNT__C_x",
-             "ANNUALREVENUE",
              "ACCOUNT_TIER__C",
              "ACCOUNT_TYPE__C",
              "CUSTOMER_CLASSIFICATION__C",
-             # "OPENTIME",
-             # "LASTACTTIME",
-             # "VALID_OPENTIME",
-             # "FIELDS_COMPLETED",
-             # "QUALIFICATION_APPROVAL_NA",
-             # "TASK_COUNT",
+             # # "OPENTIME",
+             # # "LASTACTTIME",
+             # # "VALID_OPENTIME",
+             # # "FIELDS_COMPLETED",
+             # # "TASK_COUNT",
              "DIVISION__C",
              "Code_2",
              "Code_industry")
@@ -108,164 +103,140 @@ sum(conf_mat.rf)/nrow(test)
 divisions = levels(data$DIVISION__C)
 BEV_variables = c("AMOUNT",
                   "Code_1",
-                  "CREDIT_LIMIT_ESTABLISHED__C",
                   "TYPE",
                   "CORE_RECORD_TYPE__C",
                   "ENTERPRISE_ACCOUNT__C_x",
-                  "ANNUALREVENUE",
                   "ACCOUNT_TIER__C",
                   "ACCOUNT_TYPE__C",
                   "CUSTOMER_CLASSIFICATION__C",
-                  "OPENTIME",
-                  "LASTACTTIME",
-                  "VALID_OPENTIME",
-                  "FIELDS_COMPLETED",
-                  "QUALIFICATION_APPROVAL_NA",
-                  "TASK_COUNT",
+                  # "OPENTIME",
+                  # "LASTACTTIME",
+                  # "VALID_OPENTIME",
+                  # "FIELDS_COMPLETED",
+                  # "TASK_COUNT",
                   "Code_2",
                   "Code_industry")
 BRA_variables = c("AMOUNT",
                   "Code_1",
-                  "CREDIT_LIMIT_ESTABLISHED__C",
                   "TYPE",
                   "CORE_RECORD_TYPE__C",
                   "ENTERPRISE_ACCOUNT__C_x",
-                  "ANNUALREVENUE",
                   "ACCOUNT_TIER__C",
                   "ACCOUNT_TYPE__C",
                   "CUSTOMER_CLASSIFICATION__C",
-                  "OPENTIME",
-                  "LASTACTTIME",
-                  "VALID_OPENTIME",
-                  "FIELDS_COMPLETED",
-                  "QUALIFICATION_APPROVAL_NA",
-                  "TASK_COUNT",
+                  # "OPENTIME",
+                  # "LASTACTTIME",
+                  # "VALID_OPENTIME",
+                  # "FIELDS_COMPLETED",
+                  # "TASK_COUNT",
                   "Code_2",
-                  "Code_industry")
+                  "Code_industry"
+                  )
 COR_variables = c("AMOUNT",
                   "Code_1",
-                  "CREDIT_LIMIT_ESTABLISHED__C",
                   "TYPE",
                   "CORE_RECORD_TYPE__C",
                   "ENTERPRISE_ACCOUNT__C_x",
-                  "ANNUALREVENUE",
                   "ACCOUNT_TIER__C",
                   "ACCOUNT_TYPE__C",
                   "CUSTOMER_CLASSIFICATION__C",
-                  "OPENTIME",
-                  "LASTACTTIME",
-                  "VALID_OPENTIME",
-                  "FIELDS_COMPLETED",
-                  "QUALIFICATION_APPROVAL_NA",
-                  "TASK_COUNT",
+                  # "OPENTIME",
+                  # "LASTACTTIME",
+                  # "VALID_OPENTIME",
+                  # "FIELDS_COMPLETED",
+                  # "TASK_COUNT",
                   "Code_2",
                   "Code_industry")
 FLD_variables = c("AMOUNT",
                   "Code_1",
-                  "CREDIT_LIMIT_ESTABLISHED__C",
                   "TYPE",
                   "CORE_RECORD_TYPE__C",
                   "ENTERPRISE_ACCOUNT__C_x",
-                  "ANNUALREVENUE",
                   "ACCOUNT_TIER__C",
                   "ACCOUNT_TYPE__C",
                   "CUSTOMER_CLASSIFICATION__C",
-                  "OPENTIME",
-                  "LASTACTTIME",
-                  "VALID_OPENTIME",
-                  "FIELDS_COMPLETED",
-                  "QUALIFICATION_APPROVAL_NA",
-                  "TASK_COUNT",
+                  # "OPENTIME",
+                  # "LASTACTTIME",
+                  # "VALID_OPENTIME",
+                  # "FIELDS_COMPLETED",
+                  # "TASK_COUNT",
                   "Code_2",
                   "Code_industry")
 MD_variables = c("AMOUNT",
                  "Code_1",
-                 "CREDIT_LIMIT_ESTABLISHED__C",
                  "TYPE",
                  "CORE_RECORD_TYPE__C",
                  "ENTERPRISE_ACCOUNT__C_x",
-                 "ANNUALREVENUE",
                  "ACCOUNT_TIER__C",
                  "ACCOUNT_TYPE__C",
                  "CUSTOMER_CLASSIFICATION__C",
-                 "OPENTIME",
-                 "LASTACTTIME",
-                 "VALID_OPENTIME",
-                 "FIELDS_COMPLETED",
-                 "QUALIFICATION_APPROVAL_NA",
-                 "TASK_COUNT",
+                 # "OPENTIME",
+                 # "LASTACTTIME",
+                 # "VALID_OPENTIME",
+                 # "FIELDS_COMPLETED",
+                 # "TASK_COUNT",
                  "Code_2",
                  "Code_industry")
 MPS_variables = c("AMOUNT",
                   "Code_1",
-                  "CREDIT_LIMIT_ESTABLISHED__C",
                   "TYPE",
                   "CORE_RECORD_TYPE__C",
                   "ENTERPRISE_ACCOUNT__C_x",
-                  "ANNUALREVENUE",
                   "ACCOUNT_TIER__C",
                   "ACCOUNT_TYPE__C",
                   "CUSTOMER_CLASSIFICATION__C",
-                  "OPENTIME",
-                  "LASTACTTIME",
-                  "VALID_OPENTIME",
-                  "FIELDS_COMPLETED",
-                  "QUALIFICATION_APPROVAL_NA",
-                  "TASK_COUNT",
+                  # "OPENTIME",
+                  # "LASTACTTIME",
+                  # "VALID_OPENTIME",
+                  # "FIELDS_COMPLETED",
+                  # "TASK_COUNT",
                   "Code_2",
                   "Code_industry")
 Other_variables = c("AMOUNT",
                     "Code_1",
-                    "CREDIT_LIMIT_ESTABLISHED__C",
                     "TYPE",
                     "CORE_RECORD_TYPE__C",
                     "ENTERPRISE_ACCOUNT__C_x",
-                    "ANNUALREVENUE",
                     "ACCOUNT_TIER__C",
                     "ACCOUNT_TYPE__C",
                     "CUSTOMER_CLASSIFICATION__C",
-                    "OPENTIME",
-                    "LASTACTTIME",
-                    "VALID_OPENTIME",
-                    "FIELDS_COMPLETED",
-                    "QUALIFICATION_APPROVAL_NA",
-                    "TASK_COUNT",
+                    # "OPENTIME",
+                    # "LASTACTTIME",
+                    # "VALID_OPENTIME",
+                    # "FIELDS_COMPLETED",
+                    # "TASK_COUNT",
                     "Code_2",
-                    "Code_industry")
+                    "Code_industry"
+                    )
 PPD_variables = c("AMOUNT",
                   "Code_1",
-                  "CREDIT_LIMIT_ESTABLISHED__C",
                   "TYPE",
                   "CORE_RECORD_TYPE__C",
                   "ENTERPRISE_ACCOUNT__C_x",
-                  "ANNUALREVENUE",
                   "ACCOUNT_TIER__C",
                   "ACCOUNT_TYPE__C",
                   "CUSTOMER_CLASSIFICATION__C",
-                  "OPENTIME",
-                  "LASTACTTIME",
-                  "VALID_OPENTIME",
-                  "FIELDS_COMPLETED",
-                  "QUALIFICATION_APPROVAL_NA",
-                  "TASK_COUNT",
+                  # "OPENTIME",
+                  # "LASTACTTIME",
+                  # "VALID_OPENTIME",
+                  # "FIELDS_COMPLETED",
+                  # "TASK_COUNT",
                   "Code_2",
-                  "Code_industry")
+                  "Code_industry"
+                  )
 RTS_variables = c("AMOUNT",
                   "Code_1",
-                  "CREDIT_LIMIT_ESTABLISHED__C",
                   "TYPE",
                   "CORE_RECORD_TYPE__C",
                   "ENTERPRISE_ACCOUNT__C_x",
-                  "ANNUALREVENUE",
                   "ACCOUNT_TIER__C",
                   "ACCOUNT_TYPE__C",
                   "CUSTOMER_CLASSIFICATION__C",
-                  "OPENTIME",
-                  "LASTACTTIME",
-                  "VALID_OPENTIME",
-                  "FIELDS_COMPLETED",
-                  "QUALIFICATION_APPROVAL_NA",
-                  "TASK_COUNT",
+                  # "OPENTIME",
+                  # "LASTACTTIME",
+                  # "VALID_OPENTIME",
+                  # "FIELDS_COMPLETED",
+                  # "TASK_COUNT",
                   "Code_2",
                   "Code_industry")
 variables = list("BEV"=BEV_variables,
@@ -283,10 +254,8 @@ loss_acc = list()
 win_acc = list()
 total_acc = list()
 importance = list()
-total_loss_true = list()
-total_loss_false = list()
-total_win_true = list()
-total_win_false = list()
+accuracy.df = data.frame(matrix(NA,nrow=length(divisions),ncol=5))
+names(accuracy.df) = c("division","false_positive","true_negative","true_positive","false_negative")
 
 # Loop through random forest model for each division
 start.time = Sys.time()
@@ -315,29 +284,32 @@ for(i in 1:length(divisions)){
   predict.rf = predict(train.rf, test.tmp, predict.all=TRUE)$aggregate
   # Confusion matrix
   conf_mat.rf = table(test.tmp$WON__C, predict.rf > 0.55)
-  total_loss_true[divisions[i]] = conf_mat.rf[1,1]
-  total_loss_false[divisions[i]] = conf_mat.rf[1,2]
-  total_win_true[divisions[i]] = conf_mat.rf[2,2]
-  total_win_false[divisions[i]] = conf_mat.rf[2,1]
+  accuracy.df$division[i] = divisions[i]
+  accuracy.df$true_negative[i] = if(min(predict.rf) > 0.55){0}else{conf_mat.rf[1,1]}
+  accuracy.df$false_positive[i] = if(max(predict.rf) <= 0.55){0}else{conf_mat.rf[1,2]}
+  accuracy.df$true_positive[i] = if(max(predict.rf) <= 0.55){0}else{conf_mat.rf[2,2]}
+  accuracy.df$false_negative[i] = if(min(predict.rf) > 0.55){0}else{conf_mat.rf[2,1]}
   print(conf_mat.rf)
-  # Loss accuracy
-  loss_acc[divisions[i]] = conf_mat.rf[1,1]/sum(conf_mat.rf[1,])
-  print(sprintf("Loss accuracy: %f",loss_acc[divisions[i]]))
-  # Win accuracy
-  win_acc[divisions[i]] = conf_mat.rf[2,2]/sum(conf_mat.rf[2,])
-  print(sprintf("Win accuracy: %f:",win_acc[divisions[i]]))
-  # Overall accuracy
-  total_acc[divisions[i]] = (conf_mat.rf[2,2] + conf_mat.rf[1,1])/sum(conf_mat.rf)
-  print(sprintf("Overall accuracy: %f",total_acc[divisions[i]]))
-  
-  # ROC curve
-  roc.curve(test.tmp$WON__C, predict.rf, main=paste(divisions[i]," ROC Curve"))
+  # # Loss accuracy
+  # loss_acc[divisions[i]] = conf_mat.rf[1,1]/sum(conf_mat.rf[1,])
+  # print(sprintf("Loss accuracy: %f",loss_acc[divisions[i]]))
+  # # Win accuracy
+  # win_acc[divisions[i]] = conf_mat.rf[2,2]/sum(conf_mat.rf[2,])
+  # print(sprintf("Win accuracy: %f:",win_acc[divisions[i]]))
+  # # Overall accuracy
+  # total_acc[divisions[i]] = (conf_mat.rf[2,2] + conf_mat.rf[1,1])/sum(conf_mat.rf)
+  # print(sprintf("Overall accuracy: %f",total_acc[divisions[i]]))
+  # 
+  # # ROC curve
+  # roc.curve(test.tmp$WON__C, predict.rf, main=paste(divisions[i]," ROC Curve"))
 }
 print(Sys.time() - start.time)
 
-importance
-loss_acc
-win_acc
-total_acc
-(Reduce("+",total_loss_true) + Reduce("+",total_win_true))/
-  (Reduce("+",total_loss_true) + Reduce("+",total_loss_false) + Reduce("+",total_win_true) + Reduce("+",total_win_false))
+accuracy.df
+i = 1
+for(div in importance){
+  print(divisions[i])
+  print(data.frame(div[,1]), row.names = FALSE)
+  i = i + 1
+}
+print(data.frame(row.names(importance[[1]])), row.names=FALSE)
