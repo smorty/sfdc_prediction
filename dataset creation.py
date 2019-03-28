@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 
 pd.set_option('display.max_columns',20)
 
-# path = "C:\\Users\\MortensenS19\\Documents\\DSI\\Capstone\\Data\\2019.02.25"
 path = "/Users/stephenmortensen/Documents/DSI/Capstone/Data"
 files = os.listdir(path)
 
@@ -395,26 +394,3 @@ print("Wrote Oppty Acct to file.")
 
 # 3) Sales Activities: Task, Call Report, Event
 # PK: ACCOUNT_ID__C, OWNERID ??
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
- 
