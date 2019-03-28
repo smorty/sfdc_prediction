@@ -14,7 +14,8 @@ import matplotlib.pyplot as plt
 
 pd.set_option('display.max_columns',20)
 
-path = "C:\\Users\\MortensenS19\\Documents\\DSI\\Capstone\\Data\\2019.02.25"
+# path = "C:\\Users\\MortensenS19\\Documents\\DSI\\Capstone\\Data\\2019.02.25"
+path = "/Users/stephenmortensen/Documents/DSI/Capstone/Data"
 files = os.listdir(path)
 
 files_csv = [f for f in files if '.csv' in f]
@@ -24,12 +25,20 @@ d = {}
 
 for f in files_csv:
     print("reading in "+f+", which is "+str(len(f))+" characters.")
-    data = pd.read_csv(path+"\\"+f,encoding='iso-8859-1')
+    data = pd.read_csv(path+"/"+f,encoding='iso-8859-1')
     d[f] = data
     print("added all "+str(data.shape[0])+" rows and "+str(data.shape[1])+" columns of "+f)
 
-for x in d:
-    d[x.replace("Reports","Report").replace("SurveyAction","Survey_Action").replace("ties","ty").replace("Tasks","Task").replace("Events","Event").replace("eSFDC_","").replace("_Feb2019","").replace(".csv","").replace("_Extract","")] = d.pop(x)
+for x in list(d.keys()):
+    d[x.replace("Reports","Report")
+    .replace("SurveyAction","Survey_Action")
+    .replace("ties","ty")
+    .replace("Tasks","Task")
+    .replace("Events","Event")
+    .replace("eSFDC_","")
+    .replace("_Feb2019","")
+    .replace(".csv","")
+    .replace("_Extract","")] = d.pop(x)
     
 for key, value in d.items():
     print(key,"Row:" + str(value.shape[0]), "Variable:" + str(value.shape[1]))
@@ -150,7 +159,7 @@ Opportunity = ["ID",
                "LASTMODIFIEDDATE",
                "LASTACTIVITYDATE",
                "FISCALQUARTER",
-               "FISCALYEAR",   
+               "FISCALYEAR",
                "FISCAL",
                "LASTVIEWEDDATE",
                "LASTREFERENCEDDATE",
@@ -281,8 +290,10 @@ Task_count.rename(columns={'ID': 'TASK_COUNT'}, inplace=True)
 Account_raw = pd.merge(Account_raw, Task_count, left_on="ID", right_on="ACCOUNTID", how="left")
 
 # Create age-related variables
-Opportunity_raw["OPENTIME"] = (pd.to_numeric(pd.to_datetime(Opportunity_raw["CLOSEDATE"],yearfirst=True)) - pd.to_numeric(pd.to_datetime(Opportunity_raw["CREATEDDATE"],yearfirst=True)))/1000000000/60/60/24
-Opportunity_raw["LASTACTTIME"] =  (pd.to_numeric(pd.to_datetime(Opportunity_raw["LASTACTIVITYDATE"],yearfirst=True)) - pd.to_numeric(pd.to_datetime(Opportunity_raw["CREATEDDATE"],yearfirst=True)))/1000000000/60/60/24
+Opportunity_raw["OPENTIME"] = (pd.to_numeric(pd.to_datetime(Opportunity_raw["CLOSEDATE"],yearfirst=True)) - 
+    pd.to_numeric(pd.to_datetime(Opportunity_raw["CREATEDDATE"],yearfirst=True)))/1000000000/60/60/24
+Opportunity_raw["LASTACTTIME"] =  (pd.to_numeric(pd.to_datetime(Opportunity_raw["LASTACTIVITYDATE"],yearfirst=True)) - 
+    pd.to_numeric(pd.to_datetime(Opportunity_raw["CREATEDDATE"],yearfirst=True)))/1000000000/60/60/24
 Opportunity_raw["VALID_OPENTIME"] = (Opportunity_raw.OPENTIME > 0).astype(int)
 
 # Group infrequent levels of variables, filter some small anomalies
@@ -333,23 +344,23 @@ print(Task_df.shape)
 print(Oppty_Acct_df.shape)
 
 # Write data to csvs
-AccountPlan_df.to_csv(path+"\\AccountPlan_df.csv")
+AccountPlan_df.to_csv(path+"/AccountPlan_df.csv")
 print("Wrote AccountPlan to file.")
-Account_df.to_csv(path+"\\Account_df.csv")
+Account_df.to_csv(path+"/Account_df.csv")
 print("Wrote Account to file.")
-CallReport_df.to_csv(path+"\\CallReport_df.csv")
+CallReport_df.to_csv(path+"/CallReport_df.csv")
 print("Wrote CallReport to file.")
-Contact_df.to_csv(path+"\\Contact_df.csv")
+Contact_df.to_csv(path+"/Contact_df.csv")
 print("Wrote Contact to file.")
-CustomerSurvey_ActionItem_df.to_csv(path+"\\CustomerSurvey_ActionItem_df.csv")
+CustomerSurvey_ActionItem_df.to_csv(path+"/CustomerSurvey_ActionItem_df.csv")
 print("Wrote Customer Survey Action Item to file.")
-Event_df.to_csv(path+"\\Event_df.csv")
+Event_df.to_csv(path+"/Event_df.csv")
 print("Wrote Event to file.")
-Opportunity_df.to_csv(path+"\\Opportunity_df.csv")
+Opportunity_df.to_csv(path+"/Opportunity_df.csv")
 print("Wrote Opportunity to file.")
-Task_df.to_csv(path+"\\Task_df.csv")
+Task_df.to_csv(path+"/Task_df.csv")
 print("Wrote Task to file.")
-Oppty_Acct_df.to_csv(path+"\\Oppty_Acct_df.csv")
+Oppty_Acct_df.to_csv(path+"/Oppty_Acct_df.csv")
 print("Wrote Oppty Acct to file.")
 
 # Old stuff around creating new tables -----------------------------------------
