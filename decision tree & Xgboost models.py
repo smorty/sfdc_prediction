@@ -20,8 +20,8 @@ import time
 pd.set_option('display.max_columns',20)
 
 # Read in data=================================================================
-path = "C:\\Users\\lib19\\Desktop\\Capstone WestRock\\Data_Feb19"
-data_raw = pd.read_csv(path+'\\'+'Oppty_Acct_df.csv')
+path = "/Users/stephenmortensen/Documents/DSI/Capstone/Data"
+data_raw = pd.read_csv(path+'/'+'Oppty_Acct_df.csv')
 
 # Preprocessing================================================================
 # Filter to only closed deals
@@ -189,7 +189,7 @@ dt = DecisionTreeClassifier(min_samples_split=5000, max_depth=50, random_state=2
 dt_train = dt.fit(X_train, y_train)
 dt_valid_prob_all = pd.DataFrame(dt_train.predict_proba(X_valid))
 dt_valid_prob = dt_valid_prob_all[1]
-time.time() - algorithm_starts
+print(time.time() - algorithm_starts)
 
 # Confusion matrix
 y_pred = []
@@ -202,7 +202,7 @@ for p in dt_valid_prob:
 y_pred = pd.Series(y_pred, name='Predicted')    
 y_valid = pd.Series(y_valid.iloc[:,0], name='Actual') 
 dt_confusion = pd.crosstab(y_valid, y_pred)
-dt_confusion
+print(dt_confusion)
 #Predicted    0    1
 #Actual             
 #0.0        596  444
@@ -221,13 +221,13 @@ param = {'max_depth':3, 'eta':0.3, 'seed':201, 'objective':'binary:logistic', 'n
 
 algorithm_starts = time.time()
 xgb.cv(param,
-       X_train_xgb,
-       num_round_for_cv,
-       nfold = 5,
-       show_stdv = False,
-       verbose_eval = True,
-       as_pandas = False)
-time.time() - algorithm_starts
+    X_train_xgb,
+    num_round_for_cv,
+    nfold = 5,
+    show_stdv = False,
+    verbose_eval = True,
+    as_pandas = False)
+print(time.time() - algorithm_starts)
 
 algorithm_starts = time.time()
 num_round = 60
@@ -249,7 +249,7 @@ for p in xgb_valid_prob:
 
 y_pred = pd.Series(y_pred, name='Predicted')    
 dt_confusion = pd.crosstab(y_valid, y_pred)
-dt_confusion
+print(dt_confusion)
 #Predicted     0     1
 #Actual               
 #0.0        1357  1385
