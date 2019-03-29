@@ -147,8 +147,8 @@ dummies_FLD_MARKET_SEGMENT__C.head()
 
 # New dataset with dummies
 X_with_dummies = pd.concat([X, 
-                             dummies_CREDIT_LIMIT_ESTABLISHED__C,
-                             dummies_QUALIFICATION_APPROVAL_NA,
+                            #  dummies_CREDIT_LIMIT_ESTABLISHED__C,
+                            #  dummies_QUALIFICATION_APPROVAL_NA,
                              dummies_Code_1, 
                              dummies_TYPE, 
                              dummies_CORE_RECORD_TYPE__C,
