@@ -20,19 +20,19 @@ data_closed = data_raw %>% filter(CLOSED__C==1)
 
 # Select relevant variables
 target = c("WON__C")
-features = c(# "AMOUNT",
-             # "Code_1",
+features = c("AMOUNT",
+             "Code_1",
              "TYPE",
              "CORE_RECORD_TYPE__C",
              "ENTERPRISE_ACCOUNT__C_x",
              "ACCOUNT_TIER__C",
              "ACCOUNT_TYPE__C",
              "CUSTOMER_CLASSIFICATION__C",
-             # # "OPENTIME",
-             # # "LASTACTTIME",
-             # # "VALID_OPENTIME",
-             # # "FIELDS_COMPLETED",
-             # # "TASK_COUNT",
+             "OPENTIME",
+             "LASTACTTIME",
+             "VALID_OPENTIME",
+             "FIELDS_COMPLETED",
+             "TASK_COUNT",
              "DIVISION__C",
              "Code_2",
              "Code_industry")
@@ -53,8 +53,10 @@ win_tbl = table(data$WON__C)
 (win_pct = win_tbl[2]/sum(win_tbl))*100
 
 # Logistic regression-----------------------------------------------------
+start.time = Sys.time()
 train.glm = glm(WON__C ~ .,
                 data = train, family=binomial(link = "logit"))
+print(Sys.time() - start.time)
 
 print(summary(train.glm))
 
