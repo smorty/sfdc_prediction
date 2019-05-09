@@ -1,2 +1,2 @@
-# Westrock SFDC
-Dual Degree Westrock Salesforce Capstone Project
+# SFDC Prediction
+Dual Degree Salesforce Capstone Project
